@@ -1,0 +1,24 @@
+{
+  "name": "hackathon-agent",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PR-1301/Hackathon-agent.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PR-1301/Hackathon-agent/issues"
+  },
+  "homepage": "https://github.com/PR-1301/Hackathon-agent#readme",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "googleapis": "^171.4.0"
+  }
+}
