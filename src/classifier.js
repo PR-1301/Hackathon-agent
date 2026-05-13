@@ -6,7 +6,7 @@ import "dotenv/config";
 // Initializes Groq client using API key from .env
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-// Takes a single email object, sends subject + sender + body to Gemini,
+// Takes a single email object, sends subject + sender + body to Groq,
 // returns structured JSON telling us if it's a hackathon/competition
 async function classifyEmail(email) {
   const prompt = `
