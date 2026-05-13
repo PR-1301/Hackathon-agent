@@ -1,14 +1,6 @@
 import mongoose from 'mongoose';
 import 'dotenv/config';
-
-// Defines the schema for storing processed email UIDs
-// We only need the UID and when it was processed
-const processedEmailSchema = new mongoose.Schema({
-  uid: { type: String, required: true, unique: true },
-  processed_at: { type: Date, default: Date.now },
-});
-
-const ProcessedEmail = mongoose.model('ProcessedEmail', processedEmailSchema);
+import ProcessedEmail from '../models/ProcessedEmail.model.js';
 
 // Connects to MongoDB Atlas using connection string from .env
 async function connectDB() {
