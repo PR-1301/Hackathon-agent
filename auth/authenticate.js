@@ -2,15 +2,14 @@ import fs from "fs";
 import path from "path";
 import readline from "readline";
 import { google } from "googleapis";
-import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 
-dotenv.config();
+import "dotenv/config";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Access Scopes
-const SCOPES = "https://www.googleapis.com/auth/gmail.readonly"
+const SCOPES = process.env.GMAIL_SCOPE;
 //Credentials
 const CREDENTIALS_PATH = path.join(__dirname, "credentials.json");
 //tokens

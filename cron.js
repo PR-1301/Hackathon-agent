@@ -10,4 +10,4 @@ cron.schedule('0 9,18 * * *', async () => {
   await runAgent();
 });
 
-console.log('🤖 Hackathon Monitor started. Checking every 5 minutes.');
+console.log('🤖 Hackathon Monitor started');

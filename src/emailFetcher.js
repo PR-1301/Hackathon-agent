@@ -29,7 +29,7 @@ async function fetchUnreadEmails() {
   // Queries Gmail for unread message IDs only — no content yet
   const listRes = await gmail.users.messages.list({
     userId: 'me',
-    q: 'is:unread from: competitions@citchennai.net',
+    q: 'process.env.GMAIL_SEARCH_QUERY',
     maxResults: 10,
   });
 
