@@ -11,16 +11,16 @@ const BASE_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
 async function sendNotification(classification, email) {
             const from = email.from.replace(/</g, '&lt;').replace(/>/g, '&gt;');
             const message = `
-            🏆 <b>Hackathon Alert!</b>
+            <b>Hackathon Alert!</b>
 
-            📌 <b>${classification.name || email.subject}</b>
-            📋 Type: ${classification.type}
-            📅 Deadline: ${classification.deadline || 'Not mentioned'}
-            💰 Prize: ${classification.prize || 'Not mentioned'}
-            🔗 Link: ${classification.link || 'Not mentioned'}
-            📝 ${classification.summary}
+            <b>${classification.name || email.subject}</b>
+            Type: ${classification.type}
+            Deadline: ${classification.deadline || 'Not mentioned'}
+            Prize: ${classification.prize || 'Not mentioned'}
+            Link: ${classification.link || 'Not mentioned'}
+            ${classification.summary}
 
-            📧 From: ${from}
+            From: ${from}
             `.trim();
 
   try {
