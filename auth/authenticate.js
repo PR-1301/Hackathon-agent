@@ -66,3 +66,5 @@ async function authenticate() {
 }
 
 export default authenticate;
+
+authenticate()

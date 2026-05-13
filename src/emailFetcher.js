@@ -29,7 +29,7 @@ async function fetchUnreadEmails() {
   // Queries Gmail for unread message IDs only — no content yet
   const listRes = await gmail.users.messages.list({
     userId: 'me',
-    q: 'is:unread',
+    q: 'is:unread from: competitions@citchennai.net',
     maxResults: 10,
   });
 
@@ -97,13 +97,13 @@ async function fetchUnreadEmails() {
 export { getAuthClient, fetchUnreadEmails };
 
 // Test run — prints a summary of each fetched email to the terminal
-fetchUnreadEmails().then(emails => {
-  console.log(`Fetched ${emails.length} emails:\n`);
-  emails.forEach(e => {
-    console.log(`UID: ${e.uid}`);
-    console.log(`From: ${e.from}`);
-    console.log(`Subject: ${e.subject}`);
-    console.log(`Body preview: ${e.body.slice(0, 100)}...`);
-    console.log('---');
-  });
-});
+// fetchUnreadEmails().then(emails => {
+//   console.log(`Fetched ${emails.length} emails:\n`);
+//   emails.forEach(e => {
+//     console.log(`UID: ${e.uid}`);
+//     console.log(`From: ${e.from}`);
+//     console.log(`Subject: ${e.subject}`);
+//     console.log(`Body preview: ${e.body.slice(0, 100)}...`);
+//     console.log('---');
+//   });
+// });

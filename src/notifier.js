@@ -30,7 +30,7 @@ async function sendNotification(classification, email) {
       parse_mode: 'HTML',  // parses html
     });
 
-    console.log(`✅ Notification sent for: ${classification.name || email.subject}`);
+    console.log(`Notification sent for: ${classification.name || email.subject}`);
   } catch (err) {
     console.error('Full error:', JSON.stringify(err.response?.data, null, 2));
     console.error('Message:', err.message);
