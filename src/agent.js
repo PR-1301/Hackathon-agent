@@ -2,6 +2,7 @@ import { fetchUnreadEmails } from "../src/emailFetcher.js";
 import classifyEmail from "../src/classifier.js";
 import sendNotification from "../src/notifier.js";
 import { hasSeen, markSeen } from "../src/storage.js";
+import mongoose from "mongoose";
 
 async function runAgent() {
   const fetchedEmails = await fetchUnreadEmails();
@@ -12,7 +13,7 @@ async function runAgent() {
     } else {
       try{
       const data = await classifyEmail(email);
-      //console.log(`[${email.uid}] Subject: "${email.subject}" → is_relevant: ${data.is_relevant}`);
+      console.log(`[${email.uid}] Subject: "${email.subject}" → is_relevant: ${data.is_relevant}`);
       //console.log('Full classification:', JSON.stringify(data, null, 2));
       //console.log(data.is_relevant)
       if(data.is_relevant){
@@ -24,6 +25,10 @@ async function runAgent() {
       }
     }
   }
+    // Close MongoDB connection and exit cleanly
+    await mongoose.connection.close();
+    console.log('Agent run complete.');
+    process.exit(0);
 }
 
 export default runAgent;
