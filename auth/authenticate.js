@@ -1,3 +1,4 @@
+//Runs One time for refresh token
 import fs from "fs";
 import path from "path";
 import readline from "readline";
