@@ -26,6 +26,7 @@ async function authenticate() {
     client_secret,
     redirect_uris[0],
   );
+  
 
   // If token already exists, use it
   if (fs.existsSync(TOKEN_PATH)) {
@@ -69,3 +70,5 @@ async function authenticate() {
 export default authenticate;
 
 authenticate()
+
+//new auth
