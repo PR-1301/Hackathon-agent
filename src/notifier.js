@@ -38,4 +38,6 @@ async function sendNotification(classification, email) {
   }
 }
 
+sendNotification();
+
 export default sendNotification;
