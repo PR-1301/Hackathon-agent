@@ -1,63 +1,82 @@
-# Hackathon Monitor Agent 🤖
+# Hackathon Notification Bot 🤖
 
-An autonomous AI agent that monitors your Gmail for hackathon and competition emails and sends instant Telegram notifications. Runs 24/7 without any manual interaction.
+An automated Node.js pipeline that monitors Gmail for hackathon and competition emails, classifies them using an LLM via Groq, and sends real-time Telegram notifications.
 
-## How it works
+Although it uses a Large Language Model for classification, this project is **not an autonomous AI agent**. It follows a deterministic ETL (Extract → Transform → Load) workflow where the LLM serves as an intelligent filter instead of relying on brittle keyword matching or regex patterns.
 
-```
+---
+
+## Architecture
+
+```text
 Gmail API → Groq LLM Classifier → Telegram Bot
-     ↑                                  ↓
-     └────────── Cron Job ──────────────┘
-                    ↕
-               MongoDB Atlas
-             (deduplication)
+↑                                 ↓
+└────────── node-cron ────────────┘
+↕
+MongoDB Atlas
+(Deduplication Layer)
 ```
 
-Every N hours the agent:
-1. Fetches unread emails from your Gmail
-2. Checks if each email has already been processed (MongoDB)
-3. Classifies each new email using Groq's LLaMA 3.3 70B model
-4. Sends a formatted Telegram notification if a hackathon or competition is detected
-5. Marks the email as processed to prevent duplicate notifications
+### Workflow
+
+1. **Extract** – Retrieve unread emails from Gmail.
+2. **Deduplicate** – Check MongoDB to ensure the email has not already been processed.
+3. **Classify** – Send the email content to Groq's LLaMA model to determine whether it is a hackathon or competition invitation.
+4. **Notify** – Forward relevant opportunities to Telegram.
+5. **Persist** – Store the email ID in MongoDB to prevent duplicate alerts.
+
+---
+
+## Features
+
+* Gmail inbox monitoring
+* LLM-powered email classification
+* Telegram push notifications
+* MongoDB-based deduplication
+* Automated scheduling with cron jobs
+* Modular architecture for easy maintenance and testing
 
 ---
 
 ## Tech Stack
 
-| Layer | Tool |
-|---|---|
-| Runtime | Node.js (ES Modules) |
-| Email Access | Gmail API (OAuth 2.0) |
-| AI Classifier | Groq API — LLaMA 3.3 70B |
-| Notifications | Telegram Bot API |
-| Database | MongoDB Atlas |
-| Scheduler | node-cron |
+| Layer          | Technology           | Purpose                         |
+| -------------- | -------------------- | ------------------------------- |
+| Runtime        | Node.js (ES Modules) | Core application runtime        |
+| Email Source   | Gmail API            | Fetch unread emails             |
+| Classification | Groq API (LLaMA 3.x) | Detect hackathon-related emails |
+| Notifications  | Telegram Bot API     | Send alerts                     |
+| Database       | MongoDB Atlas        | Store processed email IDs       |
+| Scheduler      | node-cron            | Run periodic jobs               |
 
 ---
 
 ## Project Structure
 
-```
+```text
 hackathon-agent/
 ├── auth/
-│   ├── authenticate.js       # One-time Gmail OAuth flow
-│   ├── credentials.json      # Google OAuth credentials (never commit)
-│   └── token.json            # Gmail access token (never commit)
+│   ├── authenticate.js
+│   ├── credentials.json
+│   └── token.json
+│
 ├── models/
-│   └── ProcessedEmail.js     # Mongoose schema for deduplication
+│   └── ProcessedEmail.js
+│
 ├── src/
-│   ├── emailFetcher.js       # Fetches unread emails from Gmail
-│   ├── classifier.js         # Classifies emails using Groq LLM
-│   ├── notifier.js           # Sends Telegram notifications
-│   ├── storage.js            # MongoDB connection and query logic
-│   └── agent.js              # Main pipeline orchestrator
+│   ├── emailFetcher.js
+│   ├── classifier.js
+│   ├── notifier.js
+│   ├── storage.js
+│   └── agent.js
+│
 ├── test/
-│   ├── testClassifier.js     # Tests classifier with fake emails
-│   ├── testNotifier.js       # Tests Telegram notification
-│   └── testStorage.js        # Tests MongoDB deduplication
-├── cron.js                   # Schedules agent runs
-├── .env                      # Environment variables (never commit)
-├── .gitignore
+│   ├── testClassifier.js
+│   ├── testNotifier.js
+│   └── testStorage.js
+│
+├── cron.js
+├── .env
 └── package.json
 ```
 
@@ -65,17 +84,19 @@ hackathon-agent/
 
 ## Prerequisites
 
-- Node.js v18+
-- A Google account with Gmail
-- A Telegram account
-- MongoDB Atlas account (free tier)
-- Groq Cloud account (free tier)
+Before running the project, ensure you have:
+
+* Node.js v18 or later
+* MongoDB Atlas account
+* Groq API key
+* Google Cloud project with Gmail API enabled
+* Telegram bot token
 
 ---
 
-## Setup
+## Installation
 
-### 1. Clone the repository
+### Clone the Repository
 
 ```bash
 git clone https://github.com/yourusername/hackathon-agent.git
@@ -83,119 +104,190 @@ cd hackathon-agent
 npm install
 ```
 
-### 2. Google Cloud Setup
+---
 
-1. Go to [console.cloud.google.com](https://console.cloud.google.com)
-2. Create a new project → enable **Gmail API**
-3. Go to **APIs & Services → OAuth consent screen**
-   - Choose External → fill in app name and email
-   - Add your Gmail as a test user
-4. Go to **Credentials → Create Credentials → OAuth Client ID**
-   - Application type: Desktop App
-   - Download the JSON → rename to `credentials.json` → place in `auth/`
+## Gmail API Setup
 
-### 3. Gmail Authentication
+### 1. Create a Google Cloud Project
+
+* Open Google Cloud Console.
+* Create a new project.
+* Enable the Gmail API.
+
+### 2. Configure OAuth
+
+* Navigate to **OAuth Consent Screen**.
+* Select **External** application type.
+* Add your email as a test user.
+
+### 3. Create OAuth Credentials
+
+* Go to **Credentials**.
+* Create an **OAuth Client ID**.
+* Choose **Desktop Application**.
+* Download the generated JSON file.
+* Rename it to:
+
+```text
+credentials.json
+```
+
+* Place it inside the `auth/` directory.
+
+### 4. Generate Tokens
+
+Run:
 
 ```bash
 node auth/authenticate.js
 ```
 
-- Open the printed URL in your browser
-- Sign in and approve access
-- Copy the authorization code from the redirect URL
-- Paste it in the terminal
-- `auth/token.json` will be generated automatically
+This generates the OAuth access and refresh tokens required for Gmail access.
 
-### 4. Telegram Bot Setup
+---
 
-1. Open Telegram → search `@BotFather`
-2. Send `/newbot` → follow the prompts
-3. Copy the `BOT_TOKEN`
-4. Search `@userinfobot` → send any message → copy your `CHAT_ID`
-5. Open your bot on Telegram and send it any message first (required before it can message you)
+## Telegram Bot Setup
 
-### 5. MongoDB Atlas Setup
+### Create a Bot
 
-1. Go to [mongodb.com/atlas](https://mongodb.com/atlas)
-2. Create a free M0 cluster
-3. Create a database user
-4. Whitelist IP: `0.0.0.0/0` (allow all — for development)
-5. Connect → Drivers → copy the connection string
-6. Replace `<password>` with your database user password
+1. Open Telegram.
+2. Message `@BotFather`.
+3. Run:
 
-### 6. Groq API Setup
+```text
+/newbot
+```
 
-1. Go to [console.groq.com](https://console.groq.com)
-2. Create an account → API Keys → Create API Key
-3. Copy the key
+4. Copy the generated bot token.
 
-### 7. Environment Variables
+### Get Your Chat ID
 
-Create a `.env` file in the root directory:
+Message:
+
+```text
+@userinfobot
+```
+
+Copy your numeric Chat ID.
+
+### Activate the Bot
+
+Send:
+
+```text
+/ start
+```
+
+to your newly created bot before running the project.
+
+---
+
+## Environment Variables
+
+Create a `.env` file in the project root:
 
 ```env
 # Gmail
-GMAIL_CLIENT_ID=your_client_id
-GMAIL_CLIENT_SECRET=your_client_secret
-GMAIL_REDIRECT_URI=urn:ietf:wg:oauth:2.0:oob
-GMAIL_REFRESH_TOKEN=your_refresh_token_from_token.json
+GMAIL_CLIENT_ID=
+GMAIL_CLIENT_SECRET=
+GMAIL_REDIRECT_URI=
+GMAIL_REFRESH_TOKEN=
 
 # Telegram
-TELEGRAM_BOT_TOKEN=your_bot_token
-TELEGRAM_CHAT_ID=your_chat_id
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
 
 # MongoDB
-MONGODB_URI=your_mongodb_connection_string
+MONGODB_URI=
 
 # Groq
-GROQ_API_KEY=your_groq_api_key
-
+GROQ_API_KEY=
 ```
 
 ---
 
-## Running the Agent
+## Running the Project
 
-### Run once manually
+### Single Execution
+
+Process current unread emails once:
 
 ```bash
 node src/agent.js
 ```
 
-### Run on a schedule (recommended)
+---
+
+### Scheduled Mode
+
+Run continuously using cron:
 
 ```bash
 node cron.js
 ```
 
-Default schedule: every day at 9am and 6pm.
+Default schedule:
 
-To change the schedule, edit `cron.js`:
+```text
+9:00 AM daily
+6:00 PM daily
+```
 
-```js
-// Every 2 hours
-cron.schedule('0 */2 * * *', ...);
+Example schedule for every 2 hours:
 
-// Every day at 9am and 6pm
-cron.schedule('0 9,18 * * *', ...);
-
-// Every 3 hours
-cron.schedule('0 */3 * * *', ...);
+```javascript
+"0 */2 * * *"
 ```
 
 ---
 
 ## Testing Individual Modules
 
+### Test Classifier
+
 ```bash
-# Test classifier only
 node test/testClassifier.js
+```
 
-# Test Telegram notification
+### Test Telegram Notifications
+
+```bash
 node test/testNotifier.js
+```
 
-# Test MongoDB deduplication
+### Test MongoDB Connectivity
+
+```bash
 node test/testStorage.js
 ```
 
---- 
+---
+
+## Why Use an LLM Instead of Regex?
+
+Traditional keyword-based filters often fail when:
+
+* Wording changes
+* Opportunities use unconventional language
+* Relevant emails don't contain expected keywords
+
+Using an LLM allows semantic understanding of email content, resulting in significantly better classification accuracy with minimal maintenance.
+
+---
+
+## Future Improvements
+
+* Email summarization
+* Opportunity scoring and ranking
+* Discord notifications
+* Web dashboard
+* Multi-user support
+* Vector search for historical opportunities
+
+---
+
+## License
+
+MIT License
+
+Feel free to fork, modify, and extend the project for your own automation workflows.
